@@ -5,6 +5,12 @@ import (
 	"log"
 )
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(http.StatusText(http.StatusOK)))
+}
+
 func main() {
 	mux := http.NewServeMux()
 	
@@ -13,8 +19,8 @@ func main() {
 		Handler:	mux,
 	}
 
-	mux.Handle("/", http.FileServer(http.Dir(".")))
-	mux.Handle("/assets", http.FileServer(http.Dir(".")))
+	mux.Handle("/app/", http.StripPrefix("/app", http.FileServer(http.Dir("."))))
+	mux.HandleFunc("/healthz", handler)
 
 	log.Fatal(srv.ListenAndServe())
 }
