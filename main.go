@@ -19,6 +19,13 @@ type apiConfig struct {
 	queries *database.Queries
 }
 
+type User struct {
+	ID			uuid.UUID `json:"id"`
+	CreatedAt	time.Time `json:"created_at"`
+	UpdatedAt	time.Time `json:"updated_at"`
+	Email		string `json:"email"`
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
