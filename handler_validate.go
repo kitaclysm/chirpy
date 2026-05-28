@@ -2,30 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 )
-
-func respondWithError(w http.ResponseWriter, code int, msg string) {
-	type returnVals struct {
-		Err string `json:"error"`
-	}
-	respondWithJSON(w, code, returnVals{Err:msg})
-}
-
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	dat, err := json.Marshal(payload)
-	if err != nil {
-		log.Printf("Error marshalling JSON: %s", err)
-		w.WriteHeader(500)
-		return
-	}
-
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(code)
-    w.Write(dat)
-}
 
 func profanityCheck(msg string) string {
 	words := strings.Split(msg, " ")
@@ -51,13 +30,12 @@ func handlerChirpsValidate(w http.ResponseWriter, r *http.Request) {
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		log.Printf("Error decoding parameters: %s", err)
-		w.WriteHeader(500)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
 	}
 
 	if len(params.Body) > 140 {
-		respondWithError(w, 400, "Chirp is too long")
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 
