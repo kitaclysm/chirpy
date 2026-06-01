@@ -3,11 +3,10 @@ package main
 import (
 	"net/http"
 	"encoding/json"
-)
 
-type Parameters struct {
-	Email string `json:"email"`
-}
+	"github.com/kitaclysm/chirpy/internal/database"
+	"github.com/kitaclysm/chirpy/internal/auth"
+)
 
 func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
@@ -16,10 +15,25 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 		respondWithError(w, http.StatusBadRequest, "Error decoding JSON",err)
 		return
 	}
-	user, err := cfg.queries.CreateUser(r.Context(), params.Email)
+
+	hash, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error hashing password", err)
+		return
+	}
+
+	user, err := cfg.queries.CreateUser(r.Context(), database.CreateUserParams{
+		Email: params.Email,
+		HashedPassword:	hash,
+	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error creating user", err)
 		return
 	}
-	respondWithJSON(w, http.StatusCreated, User{ID:user.ID, CreatedAt: user.CreatedAt, UpdatedAt: user.UpdatedAt, Email: user.Email})
+	respondWithJSON(w, http.StatusCreated, User{
+		ID:			user.ID,
+		CreatedAt: 	user.CreatedAt,
+		UpdatedAt: 	user.UpdatedAt,
+		Email: 		user.Email,
+	})
 }

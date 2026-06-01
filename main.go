@@ -29,6 +29,12 @@ type User struct {
 	Email		string		`json:"email"`
 }
 
+type Parameters struct {
+	Email string `json:"email"`
+	Password string `json:"password"`
+}
+
+
 func main() {
 	godotenv.Load()
 	dbURL := os.Getenv("DB_URL")
@@ -61,7 +67,9 @@ func main() {
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpCreate)
 	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpGet)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUserCreate)
+	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 
 	log.Fatal(srv.ListenAndServe())
 }
