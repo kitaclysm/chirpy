@@ -20,19 +20,21 @@ type apiConfig struct {
 	fileserverHits	atomic.Int32
 	queries			*database.Queries
 	platform		string
-	secret			string
+	jwtSecret		string
 }
 
-type User struct {
+type LoginResponse struct {
 	ID			uuid.UUID	`json:"id"`
 	CreatedAt	time.Time	`json:"created_at"`
 	UpdatedAt	time.Time	`json:"updated_at"`
 	Email		string		`json:"email"`
+	Token		string		`json:"token"`
 }
 
 type Parameters struct {
-	Email string `json:"email"`
-	Password string `json:"password"`
+	Email 				string `json:"email"`
+	Password 			string `json:"password"`
+	ExpiresInSeconds 	int `json:"expires_in_seconds"`
 }
 
 
@@ -54,7 +56,7 @@ func main() {
 	apiCfg := apiConfig{
 		queries:	dbQueries,
 		platform:	platform,
-		secret:		secret,
+		jwtSecret:		secret,
 	}
 
 	mux := http.NewServeMux()

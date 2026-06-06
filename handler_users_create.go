@@ -30,7 +30,7 @@ func (cfg *apiConfig) handlerUserCreate(w http.ResponseWriter, r *http.Request) 
 		respondWithError(w, http.StatusInternalServerError, "Error creating user", err)
 		return
 	}
-	respondWithJSON(w, http.StatusCreated, User{
+	respondWithJSON(w, http.StatusCreated, LoginResponse{
 		ID:			user.ID,
 		CreatedAt: 	user.CreatedAt,
 		UpdatedAt: 	user.UpdatedAt,
