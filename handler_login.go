@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kitaclysm/chirpy/internal/auth"
+	"github.com/kitaclysm/chirpy/internal/database"
 )
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
@@ -22,11 +23,6 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expiresIn := 3600
-	if params.ExpiresInSeconds > 0 && params.ExpiresInSeconds <= 3600 {
-		expiresIn = params.ExpiresInSeconds
-	}
-
 	accuratePass, err := auth.CheckPasswordHash(params.Password, user.HashedPassword)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Error checking password", err)
@@ -37,17 +33,28 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.MakeJWT(user.ID, cfg.jwtSecret, time.Duration(expiresIn) * time.Second)
+	token, err := auth.MakeJWT(user.ID, cfg.jwtSecret, time.Hour)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error creating token", err)
 		return
 	}
 
+	refreshToken, err := cfg.queries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		Token:		auth.MakeRefreshToken(),
+		UserID:		user.ID,
+		ExpiresAt:	time.Now().UTC().Add(time.Duration(time.Hour * 24 * 60)),
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Error creating refresh token", err)
+		return
+	}
+
 	respondWithJSON(w, http.StatusOK, LoginResponse{
-		ID:			user.ID,
-		CreatedAt: 	user.CreatedAt,
-		UpdatedAt: 	user.UpdatedAt,
-		Email: 		user.Email,
-		Token:		token,
+		ID:				user.ID,
+		CreatedAt: 		user.CreatedAt,
+		UpdatedAt: 		user.UpdatedAt,
+		Email: 			user.Email,
+		Token:			token,
+		RefreshToken:	refreshToken.Token,
 	})
 }

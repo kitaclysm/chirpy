@@ -24,17 +24,26 @@ type apiConfig struct {
 }
 
 type LoginResponse struct {
-	ID			uuid.UUID	`json:"id"`
-	CreatedAt	time.Time	`json:"created_at"`
-	UpdatedAt	time.Time	`json:"updated_at"`
-	Email		string		`json:"email"`
-	Token		string		`json:"token"`
+	ID				uuid.UUID	`json:"id"`
+	CreatedAt		time.Time	`json:"created_at"`
+	UpdatedAt		time.Time	`json:"updated_at"`
+	Email			string		`json:"email"`
+	Token			string		`json:"token"`
+	RefreshToken	string		`json:"refresh_token"`
 }
 
 type Parameters struct {
 	Email 				string `json:"email"`
 	Password 			string `json:"password"`
-	ExpiresInSeconds 	int `json:"expires_in_seconds"`
+	// ExpiresInSeconds 	int `json:"expires_in_seconds"`
+}
+
+type returnChirp struct {
+	ID			uuid.UUID	`json:"id"`
+	CreatedAt	time.Time	`json:"created_at"`
+	UpdatedAt	time.Time	`json:"updated_at"`
+	Body		string		`json:"body"`
+	UserID		uuid.UUID	`json:"user_id"`
 }
 
 
@@ -75,6 +84,8 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpGet)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUserCreate)
 	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
+	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
+	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
 
 	log.Fatal(srv.ListenAndServe())
 }
