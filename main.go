@@ -3,49 +3,15 @@ package main
 import (
 	"net/http"
 	"log"
-	"sync/atomic"
 	"fmt"
 	"os"
 	"database/sql"
-	"time"
 
 	// "github.com/kitaclysm/chirpy/internal/config"
 	"github.com/kitaclysm/chirpy/internal/database"
 	"github.com/joho/godotenv"
-	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
-
-type apiConfig struct {
-	fileserverHits	atomic.Int32
-	queries			*database.Queries
-	platform		string
-	jwtSecret		string
-}
-
-type LoginResponse struct {
-	ID				uuid.UUID	`json:"id"`
-	CreatedAt		time.Time	`json:"created_at"`
-	UpdatedAt		time.Time	`json:"updated_at"`
-	Email			string		`json:"email"`
-	Token			string		`json:"token"`
-	RefreshToken	string		`json:"refresh_token"`
-}
-
-type Parameters struct {
-	Email 				string `json:"email"`
-	Password 			string `json:"password"`
-	// ExpiresInSeconds 	int `json:"expires_in_seconds"`
-}
-
-type returnChirp struct {
-	ID			uuid.UUID	`json:"id"`
-	CreatedAt	time.Time	`json:"created_at"`
-	UpdatedAt	time.Time	`json:"updated_at"`
-	Body		string		`json:"body"`
-	UserID		uuid.UUID	`json:"user_id"`
-}
-
 
 func main() {
 	godotenv.Load()
@@ -83,6 +49,7 @@ func main() {
 	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handlerChirpGet)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUserCreate)
+	mux.HandleFunc("PUT /api/users", apiCfg.handlerUpdateLogin)
 	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 	mux.HandleFunc("POST /api/refresh", apiCfg.handlerRefresh)
 	mux.HandleFunc("POST /api/revoke", apiCfg.handlerRevoke)
