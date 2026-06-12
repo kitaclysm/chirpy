@@ -25,9 +25,9 @@ type ReturnUser struct {
 }
 
 type Parameters struct {
-	Email 				string `json:"email"`
-	Password 			string `json:"password"`
-	// ExpiresInSeconds 	int `json:"expires_in_seconds"`
+	Email 		string `json:"email"`
+	Password 	string `json:"password"`
+	Body		string	`json:"body"`
 }
 
 type returnChirp struct {

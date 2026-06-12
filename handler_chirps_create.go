@@ -5,9 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"errors"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/kitaclysm/chirpy/internal/database"
 	"github.com/kitaclysm/chirpy/internal/auth"
 )
@@ -32,17 +30,6 @@ func validate(s string) (string, error) {
 }
 
 func (cfg *apiConfig) handlerChirpCreate(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-        Body	string		`json:"body"`
-    }
-	type returnChirp struct {
-		ID			uuid.UUID	`json:"id"`
-		CreatedAt	time.Time	`json:"created_at"`
-		UpdatedAt	time.Time	`json:"updated_at"`
-		Body		string		`json:"body"`
-		UserID	uuid.UUID	`json:"user_id"`
-	}
-
 	tokenString, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "error getting token", err)
@@ -56,7 +43,7 @@ func (cfg *apiConfig) handlerChirpCreate(w http.ResponseWriter, r *http.Request)
 	}
 
 	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
+	params := Parameters{}
 	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
