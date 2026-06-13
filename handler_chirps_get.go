@@ -36,7 +36,7 @@ func (cfg *apiConfig) handlerChirpGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chirp, err := cfg.queries.RetrieveChirp(r.Context(), chirpID)
+	chirp, err := cfg.queries.GetChirp(r.Context(), chirpID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			respondWithError(w, http.StatusNotFound, "Chirp not found", err)
