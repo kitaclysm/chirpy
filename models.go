@@ -22,6 +22,7 @@ type ReturnUser struct {
 	Email			string		`json:"email"`
 	Token			string		`json:"token"`
 	RefreshToken	string		`json:"refresh_token"`
+	IsChirpyRed		bool		`json:"is_chirpy_red"`
 }
 
 type Parameters struct {
@@ -36,4 +37,11 @@ type returnChirp struct {
 	UpdatedAt	time.Time	`json:"updated_at"`
 	Body		string		`json:"body"`
 	UserID		uuid.UUID	`json:"user_id"`
+}
+
+type upgradeRequest struct {
+	Event		string `json:"event"`
+	Data		struct	{
+		UserID	uuid.UUID `json:"user_id"`
+	} `json:"data"`
 }
