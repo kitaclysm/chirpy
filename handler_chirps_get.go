@@ -6,15 +6,34 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/kitaclysm/chirpy/internal/database"
+
 )
 
 func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 	chirpsSlice := []returnChirp{}
+	chirps := []database.Chirp{}
+	var err error
+	var authID uuid.UUID
 
-	chirps, err := cfg.queries.RetrieveChirps(r.Context())
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Error retrieving chirps", err)
-		return
+	s := r.URL.Query().Get("author_id")
+	if s != "" {
+		authID, err = uuid.Parse(s)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "error parsing author id", err)
+			return
+		}
+		chirps, err = cfg.queries.GetChirpsByAuthor(r.Context(), authID)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "error retrieving chirps", err)
+			return
+		}
+	} else {
+		chirps, err = cfg.queries.RetrieveChirps(r.Context())
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Error retrieving chirps", err)
+			return
+		}
 	}
 
 	for _, chirp := range chirps {
