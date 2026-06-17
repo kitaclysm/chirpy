@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"database/sql"
 	"errors"
+	"sort"
 
 	"github.com/google/uuid"
 	"github.com/kitaclysm/chirpy/internal/database"
-
 )
 
 func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
@@ -16,9 +16,9 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var authID uuid.UUID
 
-	s := r.URL.Query().Get("author_id")
-	if s != "" {
-		authID, err = uuid.Parse(s)
+	stringID := r.URL.Query().Get("author_id")
+	if stringID != "" {
+		authID, err = uuid.Parse(stringID)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "error parsing author id", err)
 			return
@@ -35,7 +35,7 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	
 	for _, chirp := range chirps {
 		chirpsSlice = append(chirpsSlice, returnChirp{
 			ID:			chirp.ID,
@@ -45,6 +45,18 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 			UserID:		chirp.UserID,
 		})
 	}
+
+	sorty := r.URL.Query().Get("sort")
+	if sorty == "desc" {
+		sort.Slice(chirpsSlice, func(i, j int) bool {
+			return chirpsSlice[i].CreatedAt.After(chirpsSlice[j].CreatedAt)
+		})
+	} else if sorty == "asc" || sorty == "" {
+		sort.Slice(chirpsSlice, func(i, j int) bool {
+			return chirpsSlice[i].CreatedAt.Before(chirpsSlice[j].CreatedAt)
+		})
+	}
+
 	respondWithJSON(w, http.StatusOK, chirpsSlice)
 }
 
